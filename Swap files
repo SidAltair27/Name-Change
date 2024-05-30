@@ -4,7 +4,7 @@
 
 /* Iterate through files in curr folder */
 filename curr "&curr_folder";
-filename prev "&prev_folder";
+filename prev "&prev_folder.";
 
 data _null_;
     /* Loop through each file in curr folder */
@@ -17,6 +17,7 @@ data _null_;
             /* Check if file exists in prev folder */
             if fileexist(cats("&prev_folder.", curr_file)) then do;
                 /* Overwrite file in prev folder */
+                put "Overwriting file: " curr_file;
                 infile curr(curr_file) recfm=n;
                 file prev(curr_file) recfm=n;
                 input;
@@ -27,6 +28,7 @@ data _null_;
             end;
             else do;
                 /* Move file from curr to prev folder */
+                put "Moving file: " curr_file;
                 rc = filename('temp', cats("&curr_folder.", curr_file));
                 rc = fcopy('temp', 'prev');
                 rc = filename('temp');
@@ -35,4 +37,5 @@ data _null_;
         /* Close directory */
         rc = dclose(dir_id);
     end;
+    else put "Error: Unable to open directory.";
 run;
