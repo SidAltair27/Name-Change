@@ -14,25 +14,10 @@ data _null_;
             /* Get file name */
             curr_file = dread(dir_id, i);
             
-            /* Check if file exists in prev folder */
-            if fileexist(cats("&prev_folder.", curr_file)) then do;
-                /* Overwrite file in prev folder */
-                put "Overwriting file: " curr_file;
-                infile curr(curr_file) recfm=n;
-                file prev(curr_file) recfm=n;
-                input;
-                put _infile_;
-                /* Close files */
-                infile curr;
-                file prev;
-            end;
-            else do;
-                /* Move file from curr to prev folder */
-                put "Moving file: " curr_file;
-                rc = filename('temp', cats("&curr_folder.", curr_file));
-                rc = fcopy('temp', 'prev');
-                rc = filename('temp');
-            end;
+            /* Move file from curr to prev folder */
+            rc = filename('temp', cats("&curr_folder.", curr_file));
+            rc = fcopy('temp', 'prev');
+            rc = filename('temp');
         end;
         /* Close directory */
         rc = dclose(dir_id);
