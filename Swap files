@@ -1,0 +1,26 @@
+/* Define the paths to the folders and the file names */
+%let folder1 = '/path/to/folder1';
+%let folder2 = '/path/to/folder2';
+%let file_prefix = 'file';
+%let num_files = 20;
+
+/* Loop through the files and swap them between folders */
+%macro swap_files;
+    %do i = 1 %to &num_files;
+        /* Define the file names */
+        %let file1 = &folder1./&file_prefix.&i..sas7bdat;
+        %let file2 = &folder2./&file_prefix.&i..sas7bdat;
+
+        /* Swap files */
+        proc datasets library=&folder1 nodetails;
+            change &file_prefix.&i..sas7bdat = &folder2..&file_prefix.&i..sas7bdat;
+        quit;
+
+        proc datasets library=&folder2 nodetails;
+            change &file_prefix.&i..sas7bdat = &folder1..&file_prefix.&i..sas7bdat;
+        quit;
+    %end;
+%mend swap_files;
+
+/* Run the macro to swap the files */
+%swap_files;
