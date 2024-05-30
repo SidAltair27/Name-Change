@@ -6,28 +6,48 @@ cas mySession sessopts=(caslib="casuser");
 %let prev_folder = /path/to/prev;
 %let temp_folder = /path/to/temp;
 
-/* Step 3: Rename folders using CAS actions */
+/* Step 3: Create the temporary folder */
 proc cas;
     session mySession;
-
-    /* Rename 'curr' to 'temp' */
-    action file.rename /
+    action file.mkdir /
         caslib="casuser"
-        source="&curr_folder"
-        destination="&temp_folder";
-    
-    /* Rename 'prev' to 'curr' */
-    action file.rename /
-        caslib="casuser"
-        source="&prev_folder"
-        destination="&curr_folder";
-
-    /* Rename 'temp' to 'prev' */
-    action file.rename /
-        caslib="casuser"
-        source="&temp_folder"
-        destination="&prev_folder";
+        path="&temp_folder";
 quit;
 
-/* Step 4: Terminate the CAS session */
+/* Step 4: Move contents of 'curr' to 'temp' */
+proc cas;
+    session mySession;
+    action file.move /
+        caslib="casuser"
+        source="&curr_folder/"
+        destination="&temp_folder/";
+quit;
+
+/* Step 5: Move contents of 'prev' to 'curr' */
+proc cas;
+    session mySession;
+    action file.move /
+        caslib="casuser"
+        source="&prev_folder/"
+        destination="&curr_folder/";
+quit;
+
+/* Step 6: Move contents of 'temp' to 'prev' */
+proc cas;
+    session mySession;
+    action file.move /
+        caslib="casuser"
+        source="&temp_folder/"
+        destination="&prev_folder/";
+quit;
+
+/* Step 7: Remove the temporary folder */
+proc cas;
+    session mySession;
+    action file.rmdir /
+        caslib="casuser"
+        path="&temp_folder";
+quit;
+
+/* Step 8: Terminate the CAS session */
 cas mySession terminate;
