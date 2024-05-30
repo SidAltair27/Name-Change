@@ -1,0 +1,33 @@
+/* Step 1: Connect to a CAS session */
+cas mySession sessopts=(caslib="casuser");
+
+/* Step 2: Define the folder paths */
+%let curr_folder = /path/to/curr;
+%let prev_folder = /path/to/prev;
+%let temp_folder = /path/to/temp;
+
+/* Step 3: Use the file action to rename the folders */
+proc cas;
+    session mySession;
+
+    /* Rename 'curr' to 'temp' */
+    action file.rename /
+        caslib="casuser"
+        path="&curr_folder"
+        newName="&temp_folder";
+    
+    /* Rename 'prev' to 'curr' */
+    action file.rename /
+        caslib="casuser"
+        path="&prev_folder"
+        newName="&curr_folder";
+
+    /* Rename 'temp' to 'prev' */
+    action file.rename /
+        caslib="casuser"
+        path="&temp_folder"
+        newName="&prev_folder";
+quit;
+
+/* Step 4: Terminate the CAS session */
+cas mySession terminate;
