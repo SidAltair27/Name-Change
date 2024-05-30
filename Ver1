@@ -6,34 +6,28 @@ cas mySession sessopts=(caslib="casuser");
 %let prev_folder = /path/to/prev;
 %let temp_folder = /path/to/temp;
 
-/* Step 3: Load the filesystem action set */
-proc cas;
-    session mySession;
-    actionset filesystem;
-quit;
-
-/* Step 4: Use the filesystem action to rename the folders */
+/* Step 3: Rename folders using CAS actions */
 proc cas;
     session mySession;
 
     /* Rename 'curr' to 'temp' */
-    action filesystem.rename /
+    action file.rename /
         caslib="casuser"
-        path="&curr_folder"
-        newname="&temp_folder";
+        source="&curr_folder"
+        destination="&temp_folder";
     
     /* Rename 'prev' to 'curr' */
-    action filesystem.rename /
+    action file.rename /
         caslib="casuser"
-        path="&prev_folder"
-        newname="&curr_folder";
+        source="&prev_folder"
+        destination="&curr_folder";
 
     /* Rename 'temp' to 'prev' */
-    action filesystem.rename /
+    action file.rename /
         caslib="casuser"
-        path="&temp_folder"
-        newname="&prev_folder";
+        source="&temp_folder"
+        destination="&prev_folder";
 quit;
 
-/* Step 5: Terminate the CAS session */
+/* Step 4: Terminate the CAS session */
 cas mySession terminate;
