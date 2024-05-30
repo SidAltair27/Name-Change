@@ -1,24 +1,38 @@
-/* Define the paths to the folders */
-%let folder1 = /path/to/folder1;
-%let folder2 = /path/to/folder2;
+/* Define file locations */
+%let curr_folder = '/path/to/curr/';
+%let prev_folder = '/path/to/prev/';
 
-/* List of file names */
-%let file_names = file1.sas7bdat file2.sas7bdat file3.sas7bdat /* Add more file names here */;
+/* Iterate through files in curr folder */
+filename curr "&curr_folder";
+filename prev "&prev_folder";
 
-/* Swap files between folders */
-%macro swap_files;
-    %do i = 1 %to %sysfunc(countw(&file_names));
-        %let file_name = %scan(&file_names, &i);
-
-        proc datasets library=&folder1 nodetails;
-            change "&folder1./&file_name" = "&folder2./&file_name";
-        quit;
-
-        proc datasets library=&folder2 nodetails;
-            change "&folder2./&file_name" = "&folder1./&file_name";
-        quit;
-    %end;
-%mend swap_files;
-
-/* Run the macro to swap the files */
-%swap_files;
+data _null_;
+    /* Loop through each file in curr folder */
+    dir_id = dopen('curr');
+    if dir_id > 0 then do;
+        do i = 1 to dnum(dir_id);
+            /* Get file name */
+            curr_file = dread(dir_id, i);
+            
+            /* Check if file exists in prev folder */
+            if fileexist(cats("&prev_folder.", curr_file)) then do;
+                /* Overwrite file in prev folder */
+                infile curr(curr_file) recfm=n;
+                file prev(curr_file) recfm=n;
+                input;
+                put _infile_;
+                /* Close files */
+                infile curr;
+                file prev;
+            end;
+            else do;
+                /* Move file from curr to prev folder */
+                rc = filename('temp', cats("&curr_folder.", curr_file));
+                rc = fcopy('temp', 'prev');
+                rc = filename('temp');
+            end;
+        end;
+        /* Close directory */
+        rc = dclose(dir_id);
+    end;
+run;
